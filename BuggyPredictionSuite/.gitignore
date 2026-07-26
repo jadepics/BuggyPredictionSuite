@@ -1,0 +1,7 @@
+**/target/
+**/output/*.xlsx
+**/workspace/**
+!**/workspace/.gitkeep
+!**/output/.gitkeep
+.idea/
+*.iml

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Buggy Prediction structural rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.github.io/schema/ruleset_2_0_0.xsd">
+    <description>Controlli contro stampe dirette, God Class e metodi eccessivamente lunghi.</description>
+    <rule ref="category/java/bestpractices.xml/SystemPrintln"/>
+    <rule ref="category/java/bestpractices.xml/AvoidPrintStackTrace"/>
+    <rule ref="category/java/design.xml/GodClass"/>
+    <rule ref="category/java/design.xml/ExcessiveMethodLength"/>
+</ruleset>
