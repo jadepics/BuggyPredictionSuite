@@ -18,7 +18,9 @@
         <junit.version>5.12.2</junit.version>
         <pmd.version>7.26.0</pmd.version>
         <slf4j.version>2.0.17</slf4j.version>
+        <sonar.organization>ispw</sonar.organization>
     </properties>
+
 
     <build>
         <plugins>
