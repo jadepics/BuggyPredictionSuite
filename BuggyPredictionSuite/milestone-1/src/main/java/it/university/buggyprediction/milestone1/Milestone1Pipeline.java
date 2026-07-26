@@ -67,3 +67,4 @@ final class Milestone1Pipeline {
         LOGGER.log(Level.INFO, "Fase finale richiesta: {0}", config.targetStep());
     }
 }
+//inserisco codesmell
