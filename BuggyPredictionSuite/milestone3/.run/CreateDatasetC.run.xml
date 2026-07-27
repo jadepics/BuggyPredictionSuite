@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Milestone 3 - Crea C" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="it.university.buggyprediction.milestone3.CreateDatasetC" />
+    <module name="milestone3" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
