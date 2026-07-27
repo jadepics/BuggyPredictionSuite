@@ -30,3 +30,4 @@ final class CommitStep implements MilestoneStep {
         LOGGER.log(Level.INFO, "Ticket con almeno un commit candidato: {0}", commits.size());
     }
 }
+//commit code smell
