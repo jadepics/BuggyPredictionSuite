@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/BuggyPredictionSuite_PMD_smells_fixed.iml" filepath="$PROJECT_DIR$/.idea/BuggyPredictionSuite_PMD_smells_fixed.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BuggyPredictionSuite/buggy-prediction-suite.iml" filepath="$PROJECT_DIR$/BuggyPredictionSuite/buggy-prediction-suite.iml" />
     </modules>
   </component>
 </project>

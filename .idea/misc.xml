@@ -9,6 +9,11 @@
         <option value="$PROJECT_DIR$/BuggyPredictionSuite/pom.xml" />
       </list>
     </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/BuggyPredictionSuite/milestone_2/mileston_2/pom.xml" />
+      </set>
+    </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_25" default="true" project-jdk-name="ms-25" project-jdk-type="JavaSDK" />
 </project>
