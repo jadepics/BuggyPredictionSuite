@@ -10,7 +10,7 @@
     <name>Buggy Prediction Suite</name>
     <modules>
         <module>milestone-1</module>
-        <module>milestone_2/mileston_2</module>
+        <module>milestone_2</module>
     </modules>
     <properties>
         <maven.compiler.release>21</maven.compiler.release>

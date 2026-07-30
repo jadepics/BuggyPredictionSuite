@@ -7,11 +7,6 @@ milestone 2/
   output/
     wekaResults.csv
 
-Esecuzione in IntelliJ:
-1. Apri la cartella del progetto che contiene "milestone 2".
-2. Apri GenerateWekaMetricsSummary.java.
-3. Premi il triangolo verde accanto al metodo main.
-4. Non sono necessari argomenti né librerie esterne.
 
 Output generato:
 - milestone 2/output/wekaMetricsSummary.csv
