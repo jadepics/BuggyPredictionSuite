@@ -7,11 +7,14 @@
         <option value="$PROJECT_DIR$/BuggyPredictionSuite/milestone3/pom.xml" />
         <option value="$PROJECT_DIR$/BuggyPredictionSuite/milestone-1/pom.xml" />
         <option value="$PROJECT_DIR$/BuggyPredictionSuite/pom.xml" />
+        <option value="$PROJECT_DIR$/Syncope_classCsv/pom.xml" />
+        <option value="$PROJECT_DIR$/Syncope_PMD_Standalone_Fixed/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/BuggyPredictionSuite/milestone_2/mileston_2/pom.xml" />
+        <option value="$PROJECT_DIR$/Syncope_classCsv/pom.xml" />
       </set>
     </option>
   </component>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Syncope code smells"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+    <description>
+        Ruleset used to count maintainability, design, correctness, concurrency
+        and performance code smells. Code-style, documentation and security
+        vulnerability rules are intentionally excluded.
+
+        The Java security category is intentionally not loaded because its
+        HardCodedCryptoKey and InsecureCryptoIv rules may trigger an internal
+        PMD error on some modern Java source constructs. Those findings are
+        security vulnerabilities rather than maintainability code smells.
+    </description>
+
+    <rule ref="category/java/bestpractices.xml" />
+    <rule ref="category/java/design.xml" />
+    <rule ref="category/java/errorprone.xml" />
+    <rule ref="category/java/multithreading.xml" />
+    <rule ref="category/java/performance.xml" />
+</ruleset>

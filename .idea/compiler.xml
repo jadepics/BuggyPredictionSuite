@@ -9,6 +9,7 @@
         <module name="milestone3" />
         <module name="milestone-1" />
         <module name="mileston_2" />
+        <module name="syncope-pmd-csv-standalone" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
