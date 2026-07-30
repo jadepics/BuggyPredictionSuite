@@ -1,0 +1,5 @@
+Dataset,ActualYes,EstimatedYes,TP,FN,FP,TN,Total,EstimatedMinusActual,AbsoluteRelativeErrorPercent,CorrectlyClassified,AccuracyPercent,SourceFile
+A,2816,3482,2816,0,666,23092,26574,666,23.65,25908,97.49,C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests\AResult.txt
+B+,1187,1459,1187,0,272,3896,5355,272,22.91,5083,94.92,C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests\B+Result.txt
+B,,1469,1187,0,282,3886,5355,,,5073,94.73,C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests\BResult.txt
+C,1629,2023,1629,0,394,19196,21219,394,24.19,20825,98.14,C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests\CResult.txt

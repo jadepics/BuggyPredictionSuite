@@ -1,0 +1,59 @@
+MILESTONE 3 - CORRELAZIONE FEATURE / DEFECTIVENESS
+
+Input A: C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\A.CSV
+Input B+: C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\B_plus.csv
+Input C: C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\C.csv
+
+Righe A: 26574
+Righe B+: 5355
+Righe C: 21219
+
+Colonna smells: NSmells
+Colonna target: Buggy
+
+Metodo:
+- media di ogni feature numerica su A, B e C;
+- B e' costruito virtualmente da B+ con NSmells = 0;
+- correlazione di Spearman (rho) tra ogni feature e NSmells su A;
+- correlazione di Spearman (rho) tra ogni feature e Defectiveness su A;
+- * quando il p-value bilaterale e' inferiore a 0.05;
+- p-value ottenuto tramite l'approssimazione t della correlazione.
+
+Feature analizzate: 22
+- LOC
+- LOCTouched
+- NR
+- Nfix
+- Nauth
+- LOCAdded
+- MaxLOCAdded
+- AverageLOCAdded
+- CLOC
+- WMC
+- MaxChurn
+- AverageChurn
+- ChangeSetSize
+- NPM
+- MaxChangeSet
+- AverageChangeSet
+- Age
+- WeightedAge
+- AGE
+- NSmells
+- NPMDRuleTypes
+- BugTicketCount
+
+Colonne escluse:
+- Project (non numerica)
+- Release (identificatore/testo)
+- ReleaseDate (non numerica)
+- ClassName (identificatore/testo)
+- ClassPath (non numerica)
+- SmellSourceRelease (identificatore/testo)
+- PMDRules (identificatore/testo)
+- PMDAnalysisStatus (identificatore/testo)
+- PMDAnalysisWarning (non numerica)
+- BugTickets (non numerica)
+- FixCommits (non numerica)
+- ConsistencyStatus (non numerica)
+- AnalysisWarning (non numerica)

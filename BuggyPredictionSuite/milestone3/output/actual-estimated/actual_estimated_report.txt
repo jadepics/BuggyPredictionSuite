@@ -1,0 +1,56 @@
+ANALISI ACTUAL / ESTIMATED - MILESTONE 3
+=======================================
+
+Directory risultati WEKA: C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests
+
+Metodo di calcolo
+-----------------
+La classe positiva è Yes. Dalla confusion matrix WEKA:
+- Actual = somma della riga della classe reale Yes (TP + FN).
+- Estimated = somma della colonna predetta Yes (TP + FP).
+- Per il dataset B la tabella What-If riporta soltanto Estimated.
+
+Dataset A
+  File: C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests\AResult.txt
+  Matrice: TP=2816, FN=0, FP=666, TN=23092
+  Actual Yes: 2816
+  Estimated Yes: 3482
+  Estimated - Actual: 666
+  Errore relativo assoluto: 23.65%
+
+Dataset B+
+  File: C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests\B+Result.txt
+  Matrice: TP=1187, FN=0, FP=272, TN=3896
+  Actual Yes: 1187
+  Estimated Yes: 1459
+  Estimated - Actual: 272
+  Errore relativo assoluto: 22.91%
+
+Dataset B
+  File: C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests\BResult.txt
+  Matrice: TP=1187, FN=0, FP=282, TN=3886
+  Actual Yes nel file: 1187 (non riportato nella tabella sintetica del paper)
+  Estimated Yes: 1469
+
+Dataset C
+  File: C:\Users\micci\PycharmProjects\BuggyPredictionSuiteOfficial\BuggyPredictionSuite\milestone3\output\wekaTests\CResult.txt
+  Matrice: TP=1629, FN=0, FP=394, TN=19196
+  Actual Yes: 1629
+  Estimated Yes: 2023
+  Estimated - Actual: 394
+  Errore relativo assoluto: 24.19%
+
+What-If scenario
+----------------
+Actual B+: 1187
+Estimated B+: 1459
+Estimated B: 1469
+Estimated B - Actual B+: 282 (+23.76%)
+Estimated B - Estimated B+: 10 (+0.69%)
+
+Tabella compatta
+----------------
+A: Actual=2816, Estimated=3482
+B+: Actual=1187, Estimated=1459
+B: Estimated=1469
+C: Actual=1629, Estimated=2023
