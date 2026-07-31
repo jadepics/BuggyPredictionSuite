@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 final class Milestone1Constants {
-    static final String PIPELINE_REVISION = "m1-pmd-smells-2026-07-25";
+    static final String PIPELINE_REVISION = "m1-pmd-smells-proportion-total-2026-07-31";
     static final String PROJECT_KEY = "SYNCOPE";
     static final String PROJECT_NAME = "Apache Syncope";
     static final String SYNCOPE_REPOSITORY_URL = "https://github.com/apache/syncope.git";
@@ -595,7 +595,7 @@ final class Ticket {
     Release injectedVersion;
     String injectedVersionSource = "";
     Double proportionUsed;
-    int priorProportionObservationCount;
+    int totalProportionObservationCount;
     ConsistencyStatus consistencyStatus = ConsistencyStatus.NOT_FULLY_CHECKABLE;
     LabelingStatus labelingStatus = LabelingStatus.NOT_PROCESSED;
     int labeledClassReleaseRows;

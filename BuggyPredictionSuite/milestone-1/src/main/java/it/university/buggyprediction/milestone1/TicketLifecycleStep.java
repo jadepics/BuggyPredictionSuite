@@ -159,82 +159,129 @@ final class ProportionState {
     }
 
     double mean() {
-        return observations.isEmpty() ? 1.0d : sum() / observations.size();
+        if (observations.isEmpty()) {
+            throw new IllegalStateException(
+                    "Nessuna osservazione disponibile per Proportion Total.");
+        }
+        return sum() / observations.size();
     }
 }
 
 
 final class ProportionEstimator {
-    private static final Logger LOGGER = Logger.getLogger(ProportionEstimator.class.getName());
+    private static final Logger LOGGER =
+            Logger.getLogger(ProportionEstimator.class.getName());
+
     private final ReleaseCatalog catalog;
     private final boolean traceEnabled;
 
-    ProportionEstimator(final ReleaseCatalog catalog, final boolean traceEnabled) {
+    ProportionEstimator(
+            final ReleaseCatalog catalog,
+            final boolean traceEnabled) {
         this.catalog = catalog;
         this.traceEnabled = traceEnabled;
     }
 
     void estimate(final List<Ticket> tickets) {
-        List<Ticket> ordered = orderedTickets(tickets);
         ProportionState state = new ProportionState();
-        LOGGER.info(() -> "[PROPORTION][START] ticketOrdinati=" + ordered.size()
-                + "; formulaOsservata=P=(FVindex-IVindex)/(FVindex-OVindex)"
-                + "; formulaStima=IVindex=FVindex-(FVindex-OVindex)*mediaP");
 
-        for (Ticket ticket : ordered) {
-            ticket.priorProportionObservationCount = state.observationCount();
+        LOGGER.info(() -> "[PROPORTION_TOTAL][START] ticket=" + tickets.size()
+                + "; formulaOsservata=P=(FVindex-IVindex)/(FVindex-OVindex)"
+                + "; formulaStima=IVindex=FVindex-(FVindex-OVindex)*mediaPtotale");
+
+        /*
+         * Prima passata: raccoglie tutte e sole le Proportion osservabili
+         * direttamente dai ticket dotati di IV derivata dalle Affected Version.
+         */
+        for (Ticket ticket : tickets) {
             if (ticket.injectedVersion != null) {
                 processObserved(ticket, state);
-            } else {
-                estimateMissing(ticket, state);
             }
         }
-        logSummary(state);
+
+        final boolean hasObservations = state.observationCount() > 0;
+        final double totalMean = hasObservations ? state.mean() : 1.0d;
+
+        for (Ticket ticket : tickets) {
+            ticket.totalProportionObservationCount = state.observationCount();
+        }
+
+        if (hasObservations) {
+            LOGGER.info(() -> String.format(
+                    Locale.ROOT,
+                    "[PROPORTION_TOTAL][MEAN] osservazioni=%d; sommaP=%.6f; mediaPtotale=%.6f",
+                    state.observationCount(),
+                    state.sum(),
+                    totalMean));
+        } else {
+            LOGGER.warning(
+                    "[PROPORTION_TOTAL][MEAN] Nessuna osservazione diretta valida: "
+                            + "per i ticket stimabili viene applicato il fallback IV=OV.");
+        }
+
+        /*
+         * Seconda passata: usa la stessa media globale per ogni ticket privo di IV.
+         */
+        for (Ticket ticket : tickets) {
+            if (ticket.injectedVersion == null) {
+                estimateMissing(ticket, state, totalMean, hasObservations);
+            }
+        }
+
+        logSummary(state, totalMean, hasObservations);
     }
 
-    private static List<Ticket> orderedTickets(final List<Ticket> tickets) {
-        List<Ticket> ordered = new ArrayList<>(tickets);
-        ordered.sort(Comparator
-                .comparing(Ticket::fixOrderingDate,
-                        Comparator.nullsLast(Comparator.naturalOrder()))
-                .thenComparing(ticket -> ticket.issue.key));
-        return ordered;
-    }
-
-    private void processObserved(final Ticket ticket, final ProportionState state) {
+    private void processObserved(
+            final Ticket ticket,
+            final ProportionState state) {
         Double observed = observedProportion(ticket);
         if (observed == null) {
             state.skippedObservationCount++;
-            trace(Level.FINE, () -> "[PROPORTION][SKIPPED_OBSERVATION] ticket="
-                    + ticket.issue.key
-                    + "; IV=" + releaseName(ticket.injectedVersion)
-                    + "; OV=" + releaseName(ticket.openingVersion)
-                    + "; FV=" + releaseName(ticket.fixedVersion)
-                    + "; motivo=" + observedProportionSkipReason(ticket)
-                    + "; osservazioniDisponibili=" + state.observationCount());
+            trace(Level.FINE, () ->
+                    "[PROPORTION_TOTAL][SKIPPED_OBSERVATION] ticket="
+                            + ticket.issue.key
+                            + "; IV=" + releaseName(ticket.injectedVersion)
+                            + "; OV=" + releaseName(ticket.openingVersion)
+                            + "; FV=" + releaseName(ticket.fixedVersion)
+                            + "; motivo=" + observedProportionSkipReason(ticket));
             return;
         }
 
         int fvIndex = ticket.fixedVersion.sequence;
         int ivIndex = ticket.injectedVersion.sequence;
         int ovIndex = ticket.openingVersion.sequence;
+
         ticket.proportionUsed = observed;
-        trace(Level.FINE, () -> String.format(
-                Locale.ROOT,
-                "[PROPORTION][OBSERVED] ticket=%s; IV=%s(index=%d); "
-                        + "OV=%s(index=%d); FV=%s(index=%d); "
-                        + "P=(%d-%d)/(%d-%d)=%d/%d=%.6f; osservazioniPrecedenti=%d",
-                ticket.issue.key, ticket.injectedVersion.version, ivIndex,
-                ticket.openingVersion.version, ovIndex,
-                ticket.fixedVersion.version, fvIndex,
-                fvIndex, ivIndex, fvIndex, ovIndex,
-                fvIndex - ivIndex, fvIndex - ovIndex, observed,
-                state.observationCount()));
         state.observations.add(observed);
         state.observedCount++;
+
+        trace(Level.FINE, () -> String.format(
+                Locale.ROOT,
+                "[PROPORTION_TOTAL][OBSERVED] ticket=%s; IV=%s(index=%d); "
+                        + "OV=%s(index=%d); FV=%s(index=%d); "
+                        + "P=(%d-%d)/(%d-%d)=%d/%d=%.6f; osservazioneValida=%d",
+                ticket.issue.key,
+                ticket.injectedVersion.version,
+                ivIndex,
+                ticket.openingVersion.version,
+                ovIndex,
+                ticket.fixedVersion.version,
+                fvIndex,
+                fvIndex,
+                ivIndex,
+                fvIndex,
+                ovIndex,
+                fvIndex - ivIndex,
+                fvIndex - ovIndex,
+                observed,
+                state.observationCount()));
     }
 
-    private void estimateMissing(final Ticket ticket, final ProportionState state) {
+    private void estimateMissing(
+            final Ticket ticket,
+            final ProportionState state,
+            final double totalMean,
+            final boolean hasObservations) {
         if (ticket.openingVersion == null || ticket.fixedVersion == null) {
             markNotEstimable(ticket, state, "MISSING_OV_OR_FV");
             return;
@@ -242,14 +289,25 @@ final class ProportionEstimator {
 
         int fvIndex = ticket.fixedVersion.sequence;
         int ovIndex = ticket.openingVersion.sequence;
+
         if (fvIndex < ovIndex) {
             markNotEstimable(ticket, state, "FV_BEFORE_OV");
         } else if (fvIndex == ovIndex) {
-            useOpeningVersion(ticket, state, "SAME_AS_OPENING_VERSION", false);
-        } else if (state.observations.isEmpty()) {
-            useOpeningVersion(ticket, state, "SIMPLE_COLD_START", true);
+            useOpeningVersion(
+                    ticket,
+                    state,
+                    "SAME_AS_OPENING_VERSION",
+                    false,
+                    totalMean);
+        } else if (!hasObservations) {
+            useOpeningVersion(
+                    ticket,
+                    state,
+                    "SIMPLE_COLD_START",
+                    true,
+                    1.0d);
         } else {
-            applyIncrementalEstimate(ticket, state, ovIndex, fvIndex);
+            applyTotalEstimate(ticket, state, ovIndex, fvIndex, totalMean);
         }
     }
 
@@ -259,103 +317,158 @@ final class ProportionEstimator {
             final String reason) {
         ticket.injectedVersionSource = "NOT_ESTIMABLE";
         state.notEstimableCount++;
-        LOGGER.warning(() -> "[PROPORTION][NOT_ESTIMABLE] ticket=" + ticket.issue.key
-                + "; OV=" + releaseName(ticket.openingVersion)
-                + "; FV=" + releaseName(ticket.fixedVersion)
-                + "; motivo=" + reason
-                + "; osservazioniDisponibili=" + state.observationCount());
+        LOGGER.warning(() ->
+                "[PROPORTION_TOTAL][NOT_ESTIMABLE] ticket=" + ticket.issue.key
+                        + "; OV=" + releaseName(ticket.openingVersion)
+                        + "; FV=" + releaseName(ticket.fixedVersion)
+                        + "; motivo=" + reason
+                        + "; osservazioniTotali=" + state.observationCount());
     }
 
     private void useOpeningVersion(
             final Ticket ticket,
             final ProportionState state,
             final String source,
-            final boolean coldStart) {
+            final boolean coldStart,
+            final double proportionValue) {
         ticket.injectedVersion = ticket.openingVersion;
         ticket.injectedVersionSource = source;
-        ticket.proportionUsed = 1.0d;
-        if (coldStart) state.coldStartCount++; else state.sameVersionCount++;
+        ticket.proportionUsed = proportionValue;
+
+        if (coldStart) {
+            state.coldStartCount++;
+        } else {
+            state.sameVersionCount++;
+        }
+
         String type = coldStart ? "COLD_START" : "SAME_VERSION";
-        trace(Level.FINE, () -> "[PROPORTION][" + type + "] ticket=" + ticket.issue.key
-                + "; OV=" + ticket.openingVersion.version
-                + "(index=" + ticket.openingVersion.sequence + ")"
-                + "; FV=" + ticket.fixedVersion.version
-                + "(index=" + ticket.fixedVersion.sequence + ")"
-                + "; IV=OV=" + ticket.openingVersion.version
-                + "; PUsata=1.000000");
+        trace(Level.FINE, () -> String.format(
+                Locale.ROOT,
+                "[PROPORTION_TOTAL][%s] ticket=%s; OV=%s(index=%d); "
+                        + "FV=%s(index=%d); IV=OV=%s; PUsata=%.6f",
+                type,
+                ticket.issue.key,
+                ticket.openingVersion.version,
+                ticket.openingVersion.sequence,
+                ticket.fixedVersion.version,
+                ticket.fixedVersion.sequence,
+                ticket.openingVersion.version,
+                proportionValue));
     }
 
-    private void applyIncrementalEstimate(
+    private void applyTotalEstimate(
             final Ticket ticket,
             final ProportionState state,
             final int ovIndex,
-            final int fvIndex) {
-        double sum = state.sum();
-        double mean = state.mean();
-        double raw = fvIndex - (fvIndex - ovIndex) * mean;
+            final int fvIndex,
+            final double totalMean) {
+        double raw = fvIndex - (fvIndex - ovIndex) * totalMean;
         int rounded = (int) Math.round(raw);
         int lowerBounded = Math.max(0, rounded);
         int predicted = Math.min(lowerBounded, ovIndex);
 
         ticket.injectedVersion = catalog.bySequence(predicted);
-        ticket.injectedVersionSource = "PROPORTION_INCREMENTAL";
-        ticket.proportionUsed = mean;
+        ticket.injectedVersionSource = "PROPORTION_TOTAL";
+        ticket.proportionUsed = totalMean;
         state.estimatedCount++;
+
         trace(Level.FINE, () -> String.format(
                 Locale.ROOT,
-                "[PROPORTION][ESTIMATED] ticket=%s; osservazioni=%d; "
-                        + "sommaP=%.6f; mediaP=%.6f; OV=%s(index=%d); FV=%s(index=%d); "
+                "[PROPORTION_TOTAL][ESTIMATED] ticket=%s; osservazioniTotali=%d; "
+                        + "mediaPtotale=%.6f; OV=%s(index=%d); FV=%s(index=%d); "
                         + "IVindexRaw=%d-(%d-%d)*%.6f=%.6f; IVindexRound=%d; "
                         + "IVindexDopoMinimoZero=%d; IVindexFinal=%d; IV=%s",
-                ticket.issue.key, state.observationCount(), sum, mean,
-                ticket.openingVersion.version, ovIndex,
-                ticket.fixedVersion.version, fvIndex,
-                fvIndex, fvIndex, ovIndex, mean, raw,
-                rounded, lowerBounded, predicted, releaseName(ticket.injectedVersion)));
+                ticket.issue.key,
+                state.observationCount(),
+                totalMean,
+                ticket.openingVersion.version,
+                ovIndex,
+                ticket.fixedVersion.version,
+                fvIndex,
+                fvIndex,
+                fvIndex,
+                ovIndex,
+                totalMean,
+                raw,
+                rounded,
+                lowerBounded,
+                predicted,
+                releaseName(ticket.injectedVersion)));
     }
 
     private static Double observedProportion(final Ticket ticket) {
         if (ticket.injectedVersion == null
                 || ticket.openingVersion == null
-                || ticket.fixedVersion == null) return null;
-        int denominator = ticket.fixedVersion.sequence - ticket.openingVersion.sequence;
-        if (denominator <= 0 || ticket.injectedVersion.sequence > ticket.openingVersion.sequence) {
+                || ticket.fixedVersion == null) {
             return null;
         }
-        return (double) (ticket.fixedVersion.sequence - ticket.injectedVersion.sequence)
+
+        int denominator =
+                ticket.fixedVersion.sequence - ticket.openingVersion.sequence;
+        if (denominator <= 0
+                || ticket.injectedVersion.sequence > ticket.openingVersion.sequence) {
+            return null;
+        }
+
+        return (double) (
+                ticket.fixedVersion.sequence - ticket.injectedVersion.sequence)
                 / denominator;
     }
 
     private static String observedProportionSkipReason(final Ticket ticket) {
-        if (ticket.injectedVersion == null) return "MISSING_IV";
-        if (ticket.openingVersion == null) return "MISSING_OV";
-        if (ticket.fixedVersion == null) return "MISSING_FV";
-        int denominator = ticket.fixedVersion.sequence - ticket.openingVersion.sequence;
-        if (denominator <= 0) return "NON_POSITIVE_DENOMINATOR:" + denominator;
+        if (ticket.injectedVersion == null) {
+            return "MISSING_IV";
+        }
+        if (ticket.openingVersion == null) {
+            return "MISSING_OV";
+        }
+        if (ticket.fixedVersion == null) {
+            return "MISSING_FV";
+        }
+
+        int denominator =
+                ticket.fixedVersion.sequence - ticket.openingVersion.sequence;
+        if (denominator <= 0) {
+            return "NON_POSITIVE_DENOMINATOR:" + denominator;
+        }
+
         return ticket.injectedVersion.sequence > ticket.openingVersion.sequence
-                ? "IV_AFTER_OV" : "UNKNOWN";
+                ? "IV_AFTER_OV"
+                : "UNKNOWN";
     }
 
     private static String releaseName(final Release release) {
         return release == null ? "" : release.version;
     }
 
-    private void logSummary(final ProportionState state) {
-        LOGGER.info(() -> "[PROPORTION][END] osservazioniDiretteUtilizzate="
-                + state.observationCount()
-                + "; observed=" + state.observedCount
-                + "; estimated=" + state.estimatedCount
-                + "; skippedObservation=" + state.skippedObservationCount
-                + "; sameVersion=" + state.sameVersionCount
-                + "; coldStart=" + state.coldStartCount
-                + "; notEstimable=" + state.notEstimableCount);
+    private void logSummary(
+            final ProportionState state,
+            final double totalMean,
+            final boolean hasObservations) {
+        LOGGER.info(() -> String.format(
+                Locale.ROOT,
+                "[PROPORTION_TOTAL][END] osservazioniDiretteUtilizzate=%d; "
+                        + "mediaPtotale=%s; observed=%d; estimated=%d; "
+                        + "skippedObservation=%d; sameVersion=%d; "
+                        + "coldStart=%d; notEstimable=%d",
+                state.observationCount(),
+                hasObservations
+                        ? String.format(Locale.ROOT, "%.6f", totalMean)
+                        : "N/A",
+                state.observedCount,
+                state.estimatedCount,
+                state.skippedObservationCount,
+                state.sameVersionCount,
+                state.coldStartCount,
+                state.notEstimableCount));
     }
 
-    private void trace(final Level defaultLevel, final java.util.function.Supplier<String> message) {
+    private void trace(
+            final Level defaultLevel,
+            final java.util.function.Supplier<String> message) {
         LOGGER.log(traceEnabled ? Level.INFO : defaultLevel, message);
     }
 }
-
 
 final class LifecycleValidator {
     void validate(final Ticket ticket) {

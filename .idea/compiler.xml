@@ -6,14 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="milestone_2" />
         <module name="milestone3" />
         <module name="milestone-1" />
-        <module name="mileston_2" />
-        <module name="syncope-pmd-csv-standalone" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="mileston_2" target="21" />
-    </bytecodeTargetLevel>
   </component>
 </project>

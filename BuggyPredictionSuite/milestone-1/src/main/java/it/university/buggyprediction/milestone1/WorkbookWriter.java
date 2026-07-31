@@ -451,7 +451,7 @@ final class TicketsSheetWriter implements SheetWriter {
                         "fixedVersionCountRaw", "fixedVersionsRaw",
                         "fixedVersion", "fixedVersionDate",
                         "injectedVersion", "injectedVersionDate", "injectedVersionSource",
-                        "proportionUsed", "priorProportionObservations",
+                        "proportionUsed", "totalProportionObservations",
                         "commitCandidateCount", "validFixCommitCount", "selectedFixCommits",
                         "consistencyStatus", "violations", "dataGaps", "warnings",
                         "labelingStatus", "labeledClassReleaseRows"
@@ -490,7 +490,7 @@ final class TicketsSheetWriter implements SheetWriter {
                     setDate(row, column++, releaseDate(ticket.injectedVersion), styles.date);
                     setString(row, column++, ticket.injectedVersionSource, styles.text);
                     setNullableDouble(row, column++, ticket.proportionUsed, styles.decimal);
-                    setInteger(row, column++, ticket.priorProportionObservationCount, styles.integer);
+                    setInteger(row, column++, ticket.totalProportionObservationCount, styles.integer);
                     setInteger(row, column++, ticket.commitCandidates.size(), styles.integer);
                     setInteger(row, column++, ticket.validCommits.size(), styles.integer);
                     setString(row, column++, ticket.validCommits.stream()
@@ -804,9 +804,9 @@ final class MetadataSheetWriter implements SheetWriter {
                 "Every effective AF must satisfy IV<=AF<=FV. AF may be later than OV and ticket creation.");
         metadata.put("FV rule", "Most recent recognized Fixed Version by release chronology.");
         metadata.put("IV rule",
-                "Oldest effective AF; if AF is absent, Incremental Proportion; cold start IV=OV.");
+                "Oldest effective AF; if AF is absent, Proportion Total; fallback IV=OV only when no valid direct observation exists.");
         metadata.put("Proportion formula",
-                "P=(FVindex-IVindex)/(FVindex-OVindex); previous direct observations only.");
+                "P=(FVindex-IVindex)/(FVindex-OVindex); one global mean is computed over all valid direct observations and reused for every missing IV.");
         metadata.put("Temporal consistency",
                 "IV<=AF<=FV; IV<=OV<=FV; releaseDate(OV)<=createDate"
                         + "<=fixCommitDate<=releaseDate(FV); equal dates are valid.");
